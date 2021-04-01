@@ -1,0 +1,7 @@
+streamlit
+pandas
+numpy
+requests
+base64
+websocket
+plotly
