@@ -1,132 +1,73 @@
-from websocket import create_connection
-import json
-import random
-import string
-import re
-import pandas as pd
-import csv
-from datetime import datetime
+import streamlit as st
+from datetime import datetime, timedelta
+from libs.structuralpivotmarkings import mark_all_pivots
+from libs.plotter import plot_pivot_markings
+from libs.tvfetch import search_data
+from libs.resampler import resample_data
+from libs.streamlithelper import get_table_download_link
+
+# Custom CSS
+st.markdown(
+"""
+<style>
+.reportview-container .main .block-container{max-width: 80%;}
+</style>
+""",
+unsafe_allow_html=True,
+)
+
+# headings
+st.title('Realtime Pivot Markings')
+st.subheader('Streaming Realtime data from tradingview')
+st.markdown("""
+* Fetches OHLC data from TradingView in Realtime (all tickers supported by TradingView - max 5000 candles)
+* Cleans and resamples data when required
+* Marks small and large pivots
+* Plots the markings on the resmapled dataframe
+---
+""")
 
 
-def filter_raw_message(text):
-    try:
-        found = re.search('"m":"(.+?)",', text).group(1)
-        found2 = re.search('"p":(.+?"}"])}', text).group(1)
-        print(found)
-        print(found2)
-        return found1, found2
-    except AttributeError:
-        print("error")
+# Sidebar Options
+st.sidebar.header('Dataset Options')
+ticker = st.sidebar.text_input('Symbol (TradingView)', 'NSE:NIFTY1!')
+resolution = st.sidebar.selectbox('Resolution (Interval)', ("1", "3", "5", "10", "15", "30", "60", "120", "240", "D", "W"), 2)
+bars = st.sidebar.slider('Number of Bars',  10, 5000, 288, 10)
+resample = st.sidebar.selectbox('Resample Resolution', ("1", "3", "5", "10", "15", "30", "60", "120", "240"), 5)
+
+st.sidebar.header('Charting Options')
+default_start = (datetime.now() - timedelta(days=365)).date()
+default_end = (datetime.now()).date()
+START_DT = default_start
+END_DT = default_end
+
+# START_DT = st.sidebar.date_input('Start Date', default_start)
+# END_DT = st.sidebar.date_input('End Date', default_end)
+LP_OFFSET = st.sidebar.slider('Large Pivot Label Offset', 0.0, 5.0, 2.25, 0.25)
+SP_OFFSET = st.sidebar.slider('Small Pivot Label Offset', 0.0, 5.0, 1.25, 0.25)
+BAR_OFFSET = st.sidebar.slider('Small Pivot Bar offset', 0.0, 5.0, 0.5, 0.25)
 
 
-def generateSession():
-    stringLength = 12
-    letters = string.ascii_lowercase
-    random_string = ''.join(random.choice(letters) for i in range(stringLength))
-    return "qs_" + random_string
 
 
-def generateChartSession():
-    stringLength = 12
-    letters = string.ascii_lowercase
-    random_string = ''.join(random.choice(letters) for i in range(stringLength))
-    return "cs_" + random_string
+# Update Button
+if st.sidebar.button('Refresh Data'):
 
+    # get data from trading view
+    data = search_data(ticker, resolution, bars)
+    st.markdown(get_table_download_link(data, f'Download {bars} rows of {resolution} timeframe (CSV)'), unsafe_allow_html=True)
+    st.write('Refreshed at :', datetime.now())
 
-def prependHeader(st):
-    return "~m~" + str(len(st)) + "~m~" + st
+    # check if needs resampling
+    if resample != resolution:
+        data_resampled = resample_data(data, resample, resolution)
+    else:
+        data_resampled = data
 
+    # Small and large pivot marking on resampled data    
+    data_marked = mark_all_pivots(data_resampled, 'datetime')
 
-def constructMessage(func, paramList):
-    # json_mylist = json.dumps(mylist, separators=(',', ':'))
-    return json.dumps({
-        "m": func,
-        "p": paramList
-    }, separators=(',', ':'))
-
-
-def createMessage(func, paramList):
-    return prependHeader(constructMessage(func, paramList))
-
-
-def sendRawMessage(ws, message):
-    ws.send(prependHeader(message))
-
-
-def sendMessage(ws, func, args):
-    ws.send(createMessage(func, args))
-
-
-def generate_csv(a):
-    out = re.search('"s":\[(.+?)\}\]', a).group(1)
-    x = out.split(',{\"')
-
-    with open('data_file.csv', mode='w', newline='') as data_file:
-        employee_writer = csv.writer(data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-        employee_writer.writerow(['index', 'date', 'open', 'high', 'low', 'close', 'volume'])
-
-        for xi in x:
-            xi = re.split('\[|:|,|\]', xi)
-            print(xi)
-            ind = int(xi[1])
-            ts = datetime.fromtimestamp(float(xi[4])).strftime("%Y/%m/%d, %H:%M:%S")
-            employee_writer.writerow([ind, ts, float(xi[5]), float(xi[6]), float(xi[7]), float(xi[8]), float(xi[9])])
-
-
-# Initialize the headers needed for the websocket connection
-headers = json.dumps({
-    # 'Connection': 'upgrade',
-    # 'Host': 'data.tradingview.com',
-    'Origin': 'https://data.tradingview.com'
-    # 'Cache-Control': 'no-cache',
-    # 'Upgrade': 'websocket',
-    # 'Sec-WebSocket-Extensions': 'permessage-deflate; client_max_window_bits',
-    # 'Sec-WebSocket-Key': '2C08Ri6FwFQw2p4198F/TA==',
-    # 'Sec-WebSocket-Version': '13',
-    # 'User-Agent': 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36 Edg/83.0.478.56',
-    # 'Pragma': 'no-cache',
-    # 'Upgrade': 'websocket'
-})
-
-# Then create a connection to the tunnel
-ws = create_connection(
-    'wss://data.tradingview.com/socket.io/websocket', headers=headers)
-
-session = generateSession()
-print("session generated {}".format(session))
-
-chart_session = generateChartSession()
-print("chart_session generated {}".format(chart_session))
-
-# Then send a message through the tunnel
-sendMessage(ws, "set_auth_token", ["unauthorized_user_token"])
-sendMessage(ws, "chart_create_session", [chart_session, ""])
-sendMessage(ws, "quote_create_session", [session])
-sendMessage(ws, "quote_set_fields",
-            [session, "ch", "chp", "current_session", "description", "local_description", "language", "exchange",
-             "fractional", "is_tradable", "lp", "lp_time", "minmov", "minmove2", "original_name", "pricescale",
-             "pro_name", "short_name", "type", "update_mode", "volume", "currency_code", "rchp", "rtc"])
-sendMessage(ws, "quote_add_symbols", [session, "NASDAQ:AAPL", {"flags": ['force_permission']}])
-sendMessage(ws, "quote_fast_symbols", [session, "NASDAQ:AAPL"])
-
-# st='~m~140~m~{"m":"resolve_symbol","p":}'
-# p1, p2 = filter_raw_message(st)
-sendMessage(ws, "resolve_symbol", [chart_session, "symbol_1",
-                                   "={\"symbol\":\"NASDAQ:AAPL\",\"adjustment\":\"splits\",\"session\":\"extended\"}"])
-sendMessage(ws, "create_series", [chart_session, "s1", "s1", "symbol_1", "1", 5000])
-# sendMessage(ws, "create_study", [chart_session,"st4","st1","s1","ESD@tv-scripting-101!",{"text":"BNEhyMp2zcJFvntl+CdKjA==_DkJH8pNTUOoUT2BnMT6NHSuLIuKni9D9SDMm1UOm/vLtzAhPVypsvWlzDDenSfeyoFHLhX7G61HDlNHwqt/czTEwncKBDNi1b3fj26V54CkMKtrI21tXW7OQD/OSYxxd6SzPtFwiCVAoPbF2Y1lBIg/YE9nGDkr6jeDdPwF0d2bC+yN8lhBm03WYMOyrr6wFST+P/38BoSeZvMXI1Xfw84rnntV9+MDVxV8L19OE/0K/NBRvYpxgWMGCqH79/sHMrCsF6uOpIIgF8bEVQFGBKDSxbNa0nc+npqK5vPdHwvQuy5XuMnGIqsjR4sIMml2lJGi/XqzfU/L9Wj9xfuNNB2ty5PhxgzWiJU1Z1JTzsDsth2PyP29q8a91MQrmpZ9GwHnJdLjbzUv3vbOm9R4/u9K2lwhcBrqrLsj/VfVWMSBP","pineId":"TV_SPLITS","pineVersion":"8.0"}])
-
-
-# Printing all the result
-a = ""
-while True:
-    try:
-        result = ws.recv()
-        print(result)
-        a = a + result + "\n"
-    except Exception as e:
-        print(e)
-        break
-
-generate_csv(a)
+    # plotting data
+    st.subheader(f'{ticker} Chart')
+    figure = plot_pivot_markings(data_marked, START_DT, END_DT, LP_OFFSET, SP_OFFSET, BAR_OFFSET, ticker)
+    st.plotly_chart(figure)
