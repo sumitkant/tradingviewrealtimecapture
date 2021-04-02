@@ -4,7 +4,8 @@ from libs.structuralpivotmarkings import mark_all_pivots
 from libs.plotter import plot_pivot_markings
 from libs.tvfetch import search_data
 from libs.resampler import resample_data
-from libs.streamlithelper import get_table_download_link
+from libs.streamlithelper import get_table_download_link, show_logo
+from PIL import Image
 
 # Custom CSS
 st.markdown(
@@ -16,6 +17,7 @@ st.markdown(
 unsafe_allow_html=True,
 )
 
+st.image(show_logo(), width=70)
 # headings
 st.title('Realtime Pivot Markings')
 st.subheader('Streaming Realtime data from tradingview')
