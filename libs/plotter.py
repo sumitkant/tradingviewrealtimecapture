@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
+import plotly
 
 
 def plot_pivot_markings(plot_df, START_DT, END_DT, LP_OFFSET, SP_OFFSET, BAR_OFFSET, ticker):
