@@ -55,7 +55,7 @@ if st.sidebar.button('Refresh Data'):
 
     # get data from trading view
     data = search_data(ticker, resolution, bars)
-    st.markdown(get_table_download_link(data, f'Download {bars} rows of {resolution} timeframe (CSV)'), unsafe_allow_html=True)
+    st.markdown(get_table_download_link(data, f'Download {bars} rows of {resolution}min timeframe (CSV)'), unsafe_allow_html=True)
     st.write('Refreshed at :', datetime.now())
 
     # check if needs resampling
