@@ -1,18 +1,13 @@
 import streamlit as st
-import pivot_markings_backtest
-import rollingreturns
+from apps import pivot_markings_backtest, rollingreturns
 from libs.streamlithelper import show_logo
 
 # Custom CSS
-st.markdown(
-"""
+st.markdown("""
 <style>
 .reportview-container .main .block-container{max-width: 80%;}
-img {display: block; margin:0 auto;}
 </style>
-""",
-unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True,)
 
 
 

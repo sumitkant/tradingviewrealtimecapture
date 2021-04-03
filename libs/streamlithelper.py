@@ -12,5 +12,5 @@ def get_table_download_link(df, text):
     return href
 
 def show_logo():
-    logo = Image.open('logo_min.png')
+    logo = Image.open('assets/logo_min.png')
     return logo
