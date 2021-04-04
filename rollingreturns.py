@@ -37,6 +37,7 @@ def app():
         template='plotly_white',
         paper_bgcolor='white',
         plot_bgcolor='white',
+        width=1200, 
         height=400,
         yaxis=dict(zeroline=True),
     )
