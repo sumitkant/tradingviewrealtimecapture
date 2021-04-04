@@ -1,5 +1,6 @@
 import streamlit as st
-from apps import pivot_markings_backtest, rollingreturns
+from apps import pivot_markings_backtest
+import rollingreturns
 from libs.streamlithelper import show_logo
 
 # Custom CSS
@@ -15,8 +16,11 @@ PAGES = {
     "Realtime Pivot Marking": pivot_markings_backtest,
     "Stock Rolling Returns": rollingreturns
 }
-st.image(show_logo(), width=70)
-st.subheader('Page Navigator')
+
+c1, c2, c3 = st.beta_columns((3, 1, 3))
+c2.image(show_logo(), width=150)
+st.markdown('---')
+st.subheader('Tools')
 selection = st.radio("", list(PAGES.keys()))
 st.markdown('---')
 # Logo
