@@ -5,6 +5,10 @@ from libs.plotter import plot_pivot_markings
 from libs.tvfetch import search_data
 from libs.resampler import resample_data
 from libs.streamlithelper import get_table_download_link, show_logo
+import pandas as pd
+from datetime import datetime
+from time import sleep
+
 
 def app():
     # headings
@@ -38,6 +42,20 @@ def app():
     SP_OFFSET = st.sidebar.slider('Small Pivot Label Offset', 0.0, 5.0, 1.25, 0.25)
     BAR_OFFSET = st.sidebar.slider('Small Pivot Bar offset', 0.0, 5.0, 0.5, 0.25)
 
+    # start_date = datetime.now().strftime('%Y-%m-%d 09:15:00')
+    # end_date = datetime.now().strftime('%Y-%m-%d 15:30:00')
+    # st.write(start_date, end_date)
+    # date_ranges = pd.date_range(start=start_date, end=end_date, closed=None, freq='1min')
+    # time_list = [x.strftime('%Y-%m-%d %H:%M:%S') for x in date_ranges]
+    # st.write(time_list)
+    #
+    # while True:
+    #     if datetime.now().strftime('%Y-%m-%d %H:%M:%S') in time_list:
+    #         st.write('TimePassed :', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    #         sleep(30)
+    #
+    #
+    #
     # Update Button
     if st.sidebar.button('Mark Pivots'):
 

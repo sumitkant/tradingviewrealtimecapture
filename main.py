@@ -1,5 +1,5 @@
 import streamlit as st
-from apps import pivot_markings_backtest
+import pivot_markings_backtest
 import rollingreturns
 from libs.streamlithelper import show_logo
 
@@ -9,8 +9,6 @@ st.markdown("""
 .reportview-container .main .block-container{max-width: 80%;}
 </style>
 """, unsafe_allow_html=True,)
-
-
 
 PAGES = {
     "Realtime Pivot Marking": pivot_markings_backtest,
@@ -24,7 +22,6 @@ st.subheader('Tools')
 selection = st.radio("", list(PAGES.keys()))
 st.markdown('---')
 # Logo
-
 page = PAGES[selection]
 page.app()
 

@@ -134,9 +134,9 @@ def plot_pivot_markings(plot_df, START_DT, END_DT, LP_OFFSET, SP_OFFSET, BAR_OFF
     )
     fig.update_layout(
         xaxis_rangeslider_visible=False,
-        margin=dict(l=50, r=0, b=150, t=100, pad=0),
+        margin=dict(l=50, r=0, b=50, t=10, pad=0),
         width=1200,
-        height=600,
+        height=700,
         template='seaborn',
         paper_bgcolor='white',
         plot_bgcolor='white',
@@ -153,7 +153,8 @@ def plot_pivot_markings(plot_df, START_DT, END_DT, LP_OFFSET, SP_OFFSET, BAR_OFF
             overlaying="y",
             side="right",
 
-        )
+        ),
+        showlegend=False
     )
 
     fig.update_xaxes(

@@ -9,19 +9,21 @@ def app():
     # inputs
     ticker = st.sidebar.text_input('Stock','ALKYLAMINE.NS')
     start_dt = st.sidebar.date_input('Start Date', date(2000, 1, 1))
-    end_dt = st.sidebar.date_input('End Date', datetime.now().date())
+    end_dt = st.sidebar.date_input('End Date (Today)', datetime.now().date())
     years = st.sidebar.slider('Years',1, 10, 1, 1)
 
     # computing returns
     window = 252 * years
     df = yf.download(ticker, start=start_dt, end=end_dt)
+    
     adj_close = df[['Adj Close']]
     df['window_return'] = df['Adj Close'] / df['Adj Close'].shift(window) - 1
-    df['max_roll'] = df['Adj Close'].rolling(window, min_periods=window).max()
-    df['max_roll'] = df['Adj Close'].rolling(window, min_periods=window).max()
+    df['max_roll'] = df['Adj Close'].rolling(window, min_periods=window).max()  
     df['daily_dd'] = df['Adj Close'] / df['max_roll'] - 1.0
-    df['window_dd'] = df['daily_dd'].rolling(window, min_periods=window).min()
+    df['window_dd'] = df['daily_dd'].rolling(window, min_periods=1).min()
     df.dropna(inplace=True)
+    st.write('Number of Data Points :', df.shape[0])
+
     y_axis_min = abs(df.window_dd.min())*1.10
 
     # stock plot return plot
@@ -30,14 +32,13 @@ def app():
         x=adj_close.index,
         y=adj_close['Adj Close'],
         name='Adjusted Close',
-        line=dict(color='rgb(16, 172, 132)')
     ))
     fig_stock.update_layout(
         margin=dict(l=50, r=0, b=0, t=20, pad=0),
         template='plotly_white',
         paper_bgcolor='white',
         plot_bgcolor='white',
-        width=1200, 
+        width=1200,
         height=400,
         yaxis=dict(zeroline=True),
     )
