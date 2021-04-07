@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "tradingviewdata",
+  "private_key_id": "e9325da2c30b17711331c917c6666d3e35346ce7",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQC2Ab1uIqXWThAV\nvb9TklO81U+f+2aNqS35GeqAO4F9EzapktIRprL9i4jGTWtccjQ62vmDNpuG0/Iz\n9PVlh5jWZEg/s1dvHWQCVNcNAFSiSkFGU+IbI0WE+0d3uBPqW8j0o9QqEOWm+JMj\nKyfg1UQgudsNsFECqccr+8jkGh6aTHewGfRxlyS9BUn4Rj2oY20w3jsm1pGR24+H\nTqVOziWGqWvSOnG2YdvQ9X/u5x8HVdfhZfX6jpDRKmkXQPgdyz2fI/qYsrOgP9kI\nbLPDh5Wvzw83HDxpP11dmbzfagDyC2eI3+79+ADWklYxm9mquhTJXfDQfxR/RT/K\nP8M7AI/PAgMBAAECgf8gtC9VmuQxndVGEtJOMfzZ8XpdRM8opT2dhQqeABNEZi9s\nSPV2Nn3zER+CgmbINb0s1iv/Z9CKaYsbyuhNVhAgdeSFjbQoQx+1S4lYzLZocu9H\ns8rtFWloe75bxLfPZK63RrjY1jBt0DygFSEVRTz4pGy4CPaFg/xF6vguBIN7NfS4\nVPB74WPKEvmD5ubBZSRig2ksbYHcZua1vq81IvWb6D285byElSxZ3ccen3Jn2T07\n9nzJEwRVlrKV6EMRa0LSlqTEf69HsJb+VT1+IXbYKyz4oqZZo07DMwQLI72hszM/\nUQrd4SCHtbCmHR3Dks+DK0A4MXyq+FJdJSLxmAECgYEA2ZEepCb0WJX3zMt9Aamr\nbyV6fXlgaFSRqp6Qpi6zNurvwiyQf8RaUQGu7GGJvdE2CZFeZ4BGvknQlaYw0HBw\nHf4qT6yGWiiM6vOavZGWinhuO7s+vjYGnsJPfrfdba1xsEnOl/r85+yKCNy3rZdO\njy7EFpy+r9Vmrt312EHH1c8CgYEA1iiCxi/QBaR4ipc2OFYcvHych8Se5NmesjMP\nR7zteyeZGu09kQaDsiKIpFN7nkUs6a2DilAyqUxUFUEs1FYWgnVKjR13vt9anF2Z\nAku0EOuCGw2c0cJQ6OZhvM2kCWkaptgEmMYyyLjajh5UyJUlirD5x1g8diHCzEhM\nstPEJgECgYEAmmHHhGO/7zw7Yi7ivVNQOsY1bOO77UxVMOTjb4ij0sxS5U4KGx+R\nlvnCzilIPFFALvngK0Fy8YQfZpFPAhlG9YFtNKwPidpMZEwH+YxdblSWo/vyQbbE\na9Ml5Z1CmpkAmz9EQcPvwgKu0CsOizdan29n5UPEa7DZ9Cu8T4Ad9TECgYAY0mE1\n71zBCqseBSC3ruNtxVOvOM7h34dRSDHBMtijqZdJU64LHSIuh2onAbYWRhZKj13r\nrhfxH3OvcvprMf8x575YVM4IRYMPFJojdfrM6z8NO6qtdURDelBhvcQBgzkflXIS\n8wX31dUfG8zf4smTJagNvuBjIM6fNtIM+BaIAQKBgATU+j3izZt44qydvAKkqP/B\nSyCFPR6zKVLTztqWF5vOWQv7+9e9vZRSFmhPB+21qHnMQc051p2GVgh12Hi/rZqf\n79MQIUCO0kCyRPXQu/N7KekADHPBV6NVdK8nGAUmYfLx0tQtZQzdPZTtqAW/4hIl\n4JIJrIjrBFTUlqOKbdPg\n-----END PRIVATE KEY-----\n",
+  "client_email": "sumitkant@tradingviewdata.iam.gserviceaccount.com",
+  "client_id": "112716243803390599652",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sumitkant%40tradingviewdata.iam.gserviceaccount.com"
+}

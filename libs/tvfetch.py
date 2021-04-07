@@ -60,3 +60,25 @@ def search_data(ticker, resolution, bars):
         except Exception as e:
             item = ''
             return item
+
+def fetch_raw_data(ticker, resolution, bars):
+    ws, session, chart_session = newSession()
+    messagebox(ws, session, chart_session, ticker, resolution, bars)
+
+    search_tu = True
+    while search_tu:
+        try:
+            result = ws.recv()
+            result = result.split('~')
+
+            for item in result:
+                if 'timescale_update' in item:
+                    item = pd.DataFrame([x['v'] for x in json.loads(item)['p'][1]['s1']['s']])
+                    item.columns = ['epochtime', 'open', 'high', 'low', 'close', 'volume']
+                    item['datetime'] = pd.to_datetime(item.epochtime, unit='s') + timedelta(hours=5.5)
+                    item['time'] = item.datetime.dt.time
+                    return item
+
+        except Exception as e:
+            item = ''
+            return item

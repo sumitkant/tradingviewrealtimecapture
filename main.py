@@ -1,6 +1,7 @@
 import streamlit as st
 import pivot_markings_backtest
 import rollingreturns
+import portfolioevaluate
 from libs.streamlithelper import show_logo
 
 # Custom CSS
@@ -12,7 +13,8 @@ st.markdown("""
 
 PAGES = {
     "Realtime Pivot Marking": pivot_markings_backtest,
-    "Stock Rolling Returns": rollingreturns
+    "Stock Rolling Returns": rollingreturns,
+    'Portfolio Evaluation': portfolioevaluate,
 }
 
 c1, c2, c3 = st.beta_columns((3, 1, 3))
