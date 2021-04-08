@@ -55,7 +55,8 @@ def app():
         'Qty': quantities,
     }).set_index('Stocks')
     port_table['Value'] = port_table.Price * port_table.Qty
-    port_table['Weight'] = port_table['Value']/port_table.Value.sum()
+    port_table['Weight'] = port_table['Value']*100/port_table.Value.sum()
+    port_table = port_table.sort_values('Weight', ascending=False)
     st.table(port_table)
 
     st.header(f'Investment Amount : {round(port_table.Value.sum(),2)}')
@@ -71,13 +72,18 @@ def app():
 
     benchmark_indexed = benchmark_data*100*sum(quantities)/benchmark_data.iloc[0]
 
+
     # computing returns
     portfolio_returns = compute_rolling_returns(indexed, years)
+    other_cols = [x for x in portfolio_returns.columns if x not in tickers]
+
+    null_tickers = portfolio_returns[tickers].isnull().sum()
+    if len(null_tickers[null_tickers > 0].index) > 0:
+        st.write('Not enough data for computing drawdowns for:', ','.join(list(null_tickers[null_tickers > 0].index)))
+    non_null_tickers = [x for x in tickers if x not in list(null_tickers[null_tickers > 0].index)]
+    portfolio_returns = portfolio_returns[non_null_tickers + other_cols]
     benchmark_returns = compute_rolling_returns(benchmark_indexed.to_frame(), years)
 
-    # st.write(benchmark_returns.head())
-
-    # st.write(returns.head())
 
     st.subheader(f'Portfolio vs {benchmark} - Indexed Returns')
     # stock plot return plot
