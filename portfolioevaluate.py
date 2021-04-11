@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, date
 from libs.streamlithelper import plot_indicators
+from itertools import combinations
 
 @st.cache
 def get_data(stocks, start_dt, end_dt):
@@ -29,8 +30,8 @@ def app():
     end_dt = st.sidebar.date_input('End Date (Today)', datetime.now().date())
     benchmark = st.sidebar.text_input('Benchmark', '^NSEI')
     years = st.sidebar.slider('Years', 1, 10, 1, 1)
-    tickers = st.text_input('Stocks', 'ALKYLAMINE.NS, BAJFINANCE.NS')
-    quantities = st.text_input('Quantity', '1,2')
+    tickers = st.text_input('Stocks', 'ALKYLAMINE.NS, ASIANPAINT.NS,ASTRAL.NS,AXISBANK.NS,BAJFINANCE.NS,DIVISLAB.NS,GARFIBRES.NS,GMM.BO,HDFCAMC.NS,HDFCBANK.NS,HDFCLIFE.NS,ISEC.NS,KOTAKBANK.NS,LALPATHLAB.NS,LUMAXIND.NS,MOLDTKPAC.NS,NAUKRI.NS,PIDILITIND.NS,RELAXO.NS,STERTOOLS.NS')
+    quantities = st.text_input('Quantity', '2,11,3,3,8,3,2,2,1,25,10,15,19,2,2,5,2,14,5,15')
 
     # Header
     st.title("Evaluate Portfolio!")
@@ -222,3 +223,33 @@ def app():
     st.subheader(f'{int(years)} year drawdowns')
     st.plotly_chart(fig_dd)
 
+    hp_ticker = st.selectbox('Holding period for positive returns', tickers)
+    dfhp = portfolio_data[hp_ticker].dropna().reset_index(drop=True).values
+    hp_combos = list(combinations(range(0, len(dfhp)), 2))
+    st.write('Number of data points :',len(hp_combos))
+    hpdf = pd.DataFrame([(x[1]-x[0], (dfhp[x[1]]/dfhp[x[0]] - 1)) for x in hp_combos[:10000]], columns =['Holding Period','Return'])
+    hpgroup = hpdf.groupby('Holding Period').min()
+    hpgroup2 = hpdf.groupby('Holding Period').max()
+    fighp = go.Figure()
+    fighp.add_trace(go.Scatter(
+        x=hpgroup.index,
+        y=hpgroup.Return,
+        name='MIN Return for that holding period',
+    ))
+    fighp.add_trace(go.Scatter(
+        x=hpgroup2.index,
+        y=hpgroup2.Return,
+        name='MAX Return for that holding period',
+    ))
+    fighp.update_layout(
+        margin=dict(l=50, r=0, b=0, t=20, pad=0),
+        template='plotly_white',
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        width=1200,
+        height=400,
+        legend=dict(orientation='h', y=1.02, x=1, xanchor="right", yanchor="bottom", )
+    )
+    fighp.update_xaxes(title_text='Holding Period')
+    fighp.update_yaxes(title_text='Min Return')
+    st.plotly_chart(fighp)
