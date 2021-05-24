@@ -78,11 +78,13 @@ def app():
     portfolio_returns = compute_rolling_returns(indexed, years)
     other_cols = [x for x in portfolio_returns.columns if x not in tickers]
 
-    null_tickers = portfolio_returns[tickers].isnull().sum()
-    if len(null_tickers[null_tickers > 0].index) > 0:
-        st.write('Not enough data for computing drawdowns for:', ','.join(list(null_tickers[null_tickers > 0].index)))
-    non_null_tickers = [x for x in tickers if x not in list(null_tickers[null_tickers > 0].index)]
-    portfolio_returns = portfolio_returns[non_null_tickers + other_cols]
+    if len(tickers) > 1:
+        null_tickers = portfolio_returns[tickers].isnull().sum()
+        if len(null_tickers[null_tickers > 0].index) > 0:
+            st.write('Not enough data for computing drawdowns for:', ','.join(list(null_tickers[null_tickers > 0].index)))
+        non_null_tickers = [x for x in tickers if x not in list(null_tickers[null_tickers > 0].index)]
+        portfolio_returns = portfolio_returns[non_null_tickers + other_cols]
+
     benchmark_returns = compute_rolling_returns(benchmark_indexed.to_frame(), years)
 
 
@@ -224,7 +226,11 @@ def app():
     st.plotly_chart(fig_dd)
 
     hp_ticker = st.selectbox('Holding period for positive returns', tickers)
-    dfhp = portfolio_data[hp_ticker].dropna().reset_index(drop=True).values
+    print(hp_ticker)
+    if len(tickers) > 1:
+        dfhp = portfolio_data[hp_ticker].dropna().reset_index(drop=True).values
+    else:
+        dfhp = portfolio_data.dropna().reset_index(drop=True).values
     hp_combos = list(combinations(range(0, len(dfhp)), 2))
     st.write('Number of data points :',len(hp_combos))
     hpdf = pd.DataFrame([(x[1]-x[0], (dfhp[x[1]]/dfhp[x[0]] - 1)) for x in hp_combos[:10000]], columns =['Holding Period','Return'])
