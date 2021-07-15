@@ -73,6 +73,37 @@ def app():
         # Small and large pivot marking on resampled data
         data_marked = mark_all_pivots(data_resampled, 'datetime')
 
+        st.write('Last Small Pivot :',
+                 data_marked[data_marked.pivot_text.isin(['SPH', 'SPL'])].tail(1).pivot_text.values[0],
+                 'formed at :',
+                 pd.to_datetime(data_marked[data_marked.pivot_text.isin(['SPH','SPL'])].tail(1).SP_FORMED_AT.values[0]))
+        st.write('Last Large Pivot :',
+                 data_marked[data_marked.LARGE_PIVOT.isin(['LPH', 'LPL'])].tail(1).LARGE_PIVOT.values[0],
+                 'formed at :',
+                 pd.to_datetime((data_marked[data_marked.pivot_text.isin(['SPH','SPL']) & (data_marked.break_order == 1)].tail(1).broken_at.values[0])))
+        st.write('Last SPH :',
+                 data_marked[data_marked.pivot_text.isin(['SPH'])].tail(1).high.values[0],
+                 'formed at :',
+                 pd.to_datetime(data_marked[data_marked.pivot_text.isin(['SPH'])].tail(1).SP_FORMED_AT.values[0]))
+        st.write('Last SPL :',
+                 data_marked[data_marked.pivot_text.isin(['SPL'])].tail(1).low.values[0],
+                 'formed at :',
+                 pd.to_datetime(data_marked[data_marked.pivot_text.isin(['SPL'])].tail(1).SP_FORMED_AT.values[0]))
+        st.write('Last LPH',
+                 data_marked[data_marked.LARGE_PIVOT.isin(['LPH'])].tail(1).high.values[0],
+                 'by breaking SPL at :',
+                 pd.to_datetime(data_marked[(data_marked.pivot_text.isin(['SPL'])) & (data_marked.break_order == 1)].tail(1).broken_at.values[0]))
+        st.write('Last LPL',
+                 data_marked[data_marked.LARGE_PIVOT.isin(['LPL'])].tail(1).low.values[0],
+                 'by breaking SPH at :',
+                 pd.to_datetime(data_marked[(data_marked.pivot_text.isin(['SPH'])) & (data_marked.break_order == 1)].tail(1).broken_at.values[0]))
+
+
+        st.markdown(get_table_download_link(data_marked, f'Download marked data @ {resample}min timeframe (CSV)'),
+                    unsafe_allow_html=True)
+
+
+        print(data_marked.head())
         # plotting data
         st.subheader(f'{ticker} Chart')
         figure = plot_pivot_markings(data_marked, START_DT, END_DT, LP_OFFSET, SP_OFFSET, BAR_OFFSET, ticker)

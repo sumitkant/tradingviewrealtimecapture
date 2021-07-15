@@ -2,6 +2,7 @@ import streamlit as st
 import pivot_markings_backtest
 import rollingreturns
 import portfolioevaluate
+import moneycontrolNewsScrape
 from libs.streamlithelper import show_logo
 
 # Custom CSS
@@ -15,6 +16,7 @@ PAGES = {
     "Realtime Pivot Marking": pivot_markings_backtest,
     "Stock Rolling Returns": rollingreturns,
     'Portfolio Evaluation': portfolioevaluate,
+    'News Listings' : moneycontrolNewsScrape,
 }
 
 c1, c2, c3 = st.beta_columns((3, 1, 3))

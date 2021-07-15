@@ -2,3 +2,5 @@ streamlit
 plotly
 websocket-client
 yfinance
+bs4
+nltk
