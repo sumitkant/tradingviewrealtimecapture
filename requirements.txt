@@ -4,3 +4,4 @@ websocket-client
 yfinance
 bs4
 nltk
+streamlit_autorefresh
