@@ -5,12 +5,14 @@ import portfolioevaluate
 import moneycontrolNewsScrape
 from libs.streamlithelper import show_logo
 
-# Custom CSS
-st.markdown("""
-<style>
-.reportview-container .main .block-container{max-width: 80%;}
-</style>
-""", unsafe_allow_html=True,)
+# # Custom CSS
+# st.markdown("""
+# <style>
+# .reportview-container .main .block-container{max-width: 80%;}
+# </style>
+# """, unsafe_allow_html=True,)
+st.set_page_config(layout="wide")
+
 
 PAGES = {
     "Realtime Pivot Marking": pivot_markings_backtest,
@@ -19,11 +21,10 @@ PAGES = {
     'News Listings' : moneycontrolNewsScrape,
 }
 
-c1, c2, c3 = st.beta_columns((3, 1, 3))
+c1, c2, c3 = st.columns((3, 1, 3))
 c2.image(show_logo(), width=150)
-st.markdown('---')
-st.subheader('Tools')
-selection = st.radio("", list(PAGES.keys()))
+st.sidebar.subheader('Tools')
+selection = st.sidebar.selectbox("", list(PAGES.keys()))
 st.markdown('---')
 # Logo
 page = PAGES[selection]
