@@ -99,8 +99,8 @@ def mark_all_pivots(master_df, datetime_col):
                 except Exception as e:
                     pass
 
-                # break loop if pivot found
-                if pivot_found:
+                if pivot_found:                # break loop if pivot found
+
                     break
 
             if start_bar >= master_df.shape[0] - 2:

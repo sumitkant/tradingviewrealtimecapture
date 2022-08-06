@@ -3,6 +3,7 @@ import pivot_markings_backtest
 import rollingreturns
 import portfolioevaluate
 import moneycontrolNewsScrape
+import weeklyStockSuggestor
 from libs.streamlithelper import show_logo
 
 # # Custom CSS
@@ -19,6 +20,7 @@ PAGES = {
     "Stock Rolling Returns": rollingreturns,
     'Portfolio Evaluation': portfolioevaluate,
     'News Listings' : moneycontrolNewsScrape,
+    'Weekly Stock Suggestion' :  weeklyStockSuggestor
 }
 
 c1, c2, c3 = st.columns((3, 1, 3))

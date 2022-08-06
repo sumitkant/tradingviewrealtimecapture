@@ -5,3 +5,4 @@ yfinance
 bs4
 nltk
 streamlit_autorefresh
+xgboost
