@@ -14,80 +14,107 @@ def app():
         use_column_width='always'
     )
 
-    c1, c1g, c2 = st.columns((4, 1, 4))
+    c1, c1g, c2 = st.columns((4, 5, 5))
     c1.subheader('Weekly Stock Picker Bot')
-
-    c2.subheader('Data Parameters')
-    resolution = c2.selectbox('Ticker Data Resolution',
-                              ("1", "3", "5", "10", "15", "30", "60", "120", "240", "D", "W"), 9)
-    bars = c2.slider('Bars per Ticker:', 0, 5000, 500, 50)
-    sessions = c2.slider('Number of Trading sessions in the resolution:', 0, 100, 5, 5)
-    growth_rate = c2.slider('Growth Rate:', 0.00, 1.0, 0.05, 0.01)
-    test_size = c2.slider('Test Size:', 0.1, 1.0, 0.2, 0.1)
-
     c1.markdown(f'''
-    Predict stocks in the list of stocks that will grow by more than {growth_rate*100}%  in the next week based on current data
-    
-    ##### Dependent Variable
-    If growth rate in closing price in last {sessions} sessions > {growth_rate*100}% then 1 else 0
-    
-    ##### Variables
-    * OHLC for last {bars} bars
-    
-    ##### Pipeline
-    * Get data from tradingview at a specified resolution
-    * split the data in train and test
-    * Train XGBoost Model
-    * Get Variable importance and results on OOT
-    ''')
+        Predict stocks in the list of stocks that will grow by more than growth % in the next week based on current data
+
+        ##### Dependent Variable
+        If growth rate in closing price in last some sessions > growth % then 1 else 0
+
+        ##### Pipeline
+        * Get data from tradingview at a specified resolution
+        * split the data in train and test
+        * Train XGBoost Model
+        * Get Variable importance and results on OOT
+        ''')
+
+    c1.subheader('Data Parameters')
+    resolution = c1.selectbox('Ticker Data Resolution',
+                              ("1", "3", "5", "10", "15", "30", "60", "120", "240", "D", "W"), 9)
+    bars = c1.slider('Bars per Ticker:', 0, 5000, 500, 50)
+    sessions = c1.slider('Number of Trading sessions in the resolution:', 0, 100, 5, 5)
+    growth_rate = c1.slider('Growth Rate:', 0.00, 1.0, 0.05, 0.01)
+    test_size = c1.slider('Test Size:', 0.1, 1.0, 0.2, 0.1)
+    ticker_count = c1.slider('Number of stocks to Fetch', 2, 70, 5, 1)
+
+
 
     st.markdown('''
     ---
     ''')
 
     # inputs
-    tickers = pd.read_csv('libs/tickers.csv', header=None)[0]
+    ticker_data = pd.read_csv('libs/tickers.csv', header=None)[0]
+
+    tickers = ticker_data[:ticker_count]
+
+    not_used = ['datetime', 'epochtime', 'ticker', 'volume', 'time', 'closen', 'growthn', 'dep_var', 'close']
 
 
-    not_used = ['datetime','epochtime','ticker','volume','time','closen','growthn','dep_var']
+    fe_value = """# Difference between current prices
+df['open-close'] = df.open.ewm(span=7).mean() - df.close.ewm(span=7).mean()
+df['high-close'] = df.high.ewm(span=7).mean() - df.close.ewm(span=7).mean()
+df['low-close'] = df.low.ewm(span=7).mean() - df.close.ewm(span=7).mean()
+df['high-low'] = df.high.ewm(span=7).mean() - df.low.ewm(span=7).mean()
+df['gap'] = df.open - df.close.shift(1)
+
+# higher highs
+df['h0-h1'] = df.high - df.high.shift(1)
+df['h0-h2'] = df.high - df.high.shift(2)
+df['h1-h2'] = df.high.shift(1) - df.high.shift(2)
+
+# higher closes
+df['c0-c1'] = df.close - df.close.shift(1)
+df['c0-c2'] = df.close - df.close.shift(2)
+df['c1-c2'] = df.close.shift(1) - df.close.shift(2)
+
+# net move up or down
+df['gain'] = (df.close > df.open).astype(int)
+df['loss'] = (df.close <= df.open).astype(int)
+
+# moving averages
+df['gain7_sum'] = df.gain.rolling(7).sum()
+df['gain7_mean'] = df.gain.rolling(7).mean()
+df['loss7_sum'] = df.loss.rolling(7).sum()
+df['loss7_mean'] = df.loss.rolling(7).mean()
+
+df['sma7'] = df.close.rolling(7).mean()
+df['sma21'] = df.close.rolling(21).mean()
+df['ema7'] = df.close.ewm(span=7).mean()
+df['ema21'] = df.close.ewm(span=20).mean()
+df['sma21-sma7'] = df['sma21'] - df['sma7']
+df['ema21-ema7'] = df['ema21'] - df['ema7']
+df['ema21-sma21'] = df['ema21'] - df['sma21']
+
+# volume lag
+df['volume_lag'] = df.volume.shift(1)/df.volume - 1
+df['volume_lag7'] = df['volume_lag'].rolling(7).mean()
+df['volume_lag21'] = df['volume_lag'].rolling(21).mean()
+
+# previous high low
+df['h7max-close'] = df.high.rolling(7).max() - df.close
+df['h21max-close'] = df.high.rolling(21).max() - df.close
+df['l7min-close'] = df.low.rolling(7).min() - df.close
+df['l21min-close'] = df.low.rolling(21).min() - df.close
+
+# closing price close to Big Round Number
+df['close-brn'] = df.close - round(df.close,-2)
+df['high-brn'] = df.high - round(df.close, -2)
+df['low-brn'] = df.low - round(df.close, -2)
+df['close-brn'] = df['close-brn'].rolling(7).mean()
+df['high-brn'] = df['high-brn'].rolling(7).mean()
+df['low-brn'] = df['low-brn'].rolling(7).mean()
+"""
 
     def feature_engineer(df):
-
-        # Difference between current prices
-        df['open-close'] = df.open - df.close
-        df['high-close'] = df.high - df.close
-        df['low-close'] = df.low - df.close
-        df['high-close'] = df.high - df.low
-        df['gap'] = df.open - df.close.shift(1)
-
-        # higher highs
-        df['h0-h1'] = df.high - df.high.shift(1)
-        df['h0-h2'] = df.high - df.high.shift(2)
-        df['h1-h2'] = df.high.shift(1) - df.high.shift(2)
-
-        # higher closes
-        df['c0-c1'] = df.close - df.close.shift(1)
-        df['c0-c2'] = df.close - df.close.shift(2)
-        df['c1-c2'] = df.close.shift(1) - df.close.shift(2)
-
-        # net move up or down
-        df['gain'] = (df.close > df.open).astype(int)
-        df['loss'] = (df.close <= df.open).astype(int)
-
-        # moving averages
-        df['gain7_sum'] = df.gain.rolling(7).sum()
-        df['gain7_mean'] = df.gain.rolling(7).mean()
-        df['loss7_sum'] = df.loss.rolling(7).sum()
-        df['loss7_mean'] = df.loss.rolling(7).mean()
-
-        df['sma7'] = df.close.rolling(7).mean()
-        df['sma14'] = df.close.rolling(14).mean()
-        df['sma14-sma7'] = df['sma14'] - df['sma7']
-
-        # volume lag
-        df['volume_lag'] = df.volume - df.volume.shift(1)
-
+        exec(fe_value)
         return df
+
+    fe = c1g.text_area('Feature Engineering Input', value=fe_value, height=1000)
+    c2.markdown('##### Feature Engineering')
+    c2.code(fe)
+    # feature_engineer = eval(fe)
 
     # Get data based on inputs
     @st.cache
@@ -110,7 +137,7 @@ def app():
 
             # normalize features by today's close
             for col in temp_df.columns:
-                if col not in not_used + ['close']:
+                if col not in not_used:
                     temp_df[col] = temp_df[col]/temp_df.close
 
             # train test split
@@ -145,7 +172,7 @@ def app():
 
             # normalize features by today's close
             for col in temp_df.columns:
-                if col not in not_used + ['close']:
+                if col not in not_used:
                     temp_df[col] = temp_df[col] / temp_df.close
 
             scoring_master = scoring_master.append(temp_df, ignore_index=True)
@@ -158,6 +185,9 @@ def app():
     df = dmaster.copy()
     train = dtrain.copy()
     test = dtest.copy()
+
+    # train.to_csv('assets/train.csv', index=False)
+    # test.to_csv('assets/test.csv', index=False)
 
     # creating dependent variable
 
@@ -173,25 +203,8 @@ def app():
     st.write(f'**Total {len(tickers)} Stocks**: {ticks}')
 
     # selecting variables
-    var_list = [
-        'open-close',
-        'high-close',
-        'low-close',
-        'gap',
-        'h0-h1',
-        'h0-h2',
-        'h1-h2',
-        'c0-c1',
-        'c0-c2',
-        'c1-c2',
-        'sma7',
-        'sma14-sma7',
-        'volume_lag',
-        'gain7_sum',
-        'gain7_mean',
-        'loss7_sum',
-        'loss7_mean',
-    ]
+    var_list = [x for x in df.columns if x not in not_used]
+
     st.markdown('''##### Variables for Modelling''')
     variables = st.multiselect('Select Variables to Model:', var_list, var_list)
 
@@ -225,10 +238,10 @@ def app():
     ''')
 
     c1,c2,c3 = st.columns(3)
-    eta = c1.slider('ETA:', 0.00, 0.2, 0.03, 0.01)
+    eta = c1.slider('ETA:', 0.00, 0.2, 0.03, 0.005)
     max_depth = c2.slider('max_depth:', 1, 10, 5, 1)
     min_child_weight = c3.slider('min_child_weight:', 1, 200, 20, 1)
-    num_boost_round = c1.slider('num_boost_round:', 0, 1000, 200, 50)
+    num_boost_round = c1.slider('num_boost_round:', 0, 2000, 200, 50)
     colsample_bytree = c2.slider('colsample_bytree:', 0.0, 1.0, 0.8, 0.05)
     gamma = c3.slider('GAMMA:', 0, 50, 20, 1)
 
@@ -246,9 +259,9 @@ def app():
         train_dm = xgb.DMatrix(train[variables], label=train.dep_var.values)
         test_dm = xgb.DMatrix(test[variables], label=test.dep_var.values)
         model = xgb.train(params, train_dm, num_boost_round=params['num_boost_round'], early_stopping_rounds=None)
-        return model, train_dm, test_dm
+        return model, train_dm, test_dm, params
 
-    model, train_dm, test_dm = train_xgb_model(train, test)
+    model, train_dm, test_dm, params = train_xgb_model(train, test)
 
     # Performance Metrics
     def get_performance_metrics(t, tdm, d='TRAIN'):
@@ -273,11 +286,14 @@ def app():
 
     c1, c2 = st.columns(2)
 
-    c1.markdown('''##### Performance Metrics''')
+    c1.markdown('''##### Final Parameters''')
+    c1.write(params)
+
+    c2.markdown('''##### Performance Metrics''')
     train_metrics = get_performance_metrics(train, train_dm)
     test_metrics = get_performance_metrics(test, test_dm,'TEST')
     combined_metrics = train_metrics.append(test_metrics)
-    c1.dataframe(combined_metrics)
+    c2.dataframe(combined_metrics)
     gini_drop = (test_metrics['GINI']/train_metrics['GINI'] - 1).values[0]
     c2.title(f'{gini_drop*100:.2f}%')
     c2.write('GINI Change from Train to OOT')
